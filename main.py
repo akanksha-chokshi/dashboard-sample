@@ -7,7 +7,6 @@ options = ["Project View", "Labeller View", "Overall View"]
 
 selected_view = st.sidebar.selectbox("Select a View", options)
 data = pd.read_csv ("metrics.csv")
-data ["date"] = data ["date"].apply (lambda x: pd.to_datetime(x))
 
 class_index = {}
 i = 0
