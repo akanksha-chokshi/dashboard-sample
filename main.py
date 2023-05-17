@@ -1,12 +1,14 @@
 import streamlit as st
 import pandas as pd 
+from operator import itemgetter
 
-st.title ("SageMaker Labelling Tracker - Test")
+st.title ("SageMaker Labelling Tracker")
 
 options = ["Project View", "Labeller View", "Overall View"]
 
 selected_view = st.sidebar.selectbox("Select a View", options)
 data = pd.read_csv ("metrics.csv")
+data ["date"] = data ["date"].apply (lambda x: pd.to_datetime(x))
 
 class_index = {}
 i = 0
@@ -24,11 +26,11 @@ def get_correct_annotations (df):
     annotation_count = len (df)
     correct_annotation_count = df['response'].value_counts()['Approve']
     correct_unique_annotation_count = len(df.loc[(df['response'] == 'Approve') & (~df['class_name'].isna())])
-    st.write ("Number of correct annotations:")
+    st.write ("*Number of Correct Annotations:*")
     st.success (f"{correct_annotation_count} out of {annotation_count}")
-    st.write ("% of annotations not sent to rework:")
+    st.write ("*Accuracy %:*")
     st.success (f"{round (correct_annotation_count/annotation_count * 100, 2)}%")
-    st.write ("Number of correct unique screen-class pairings: ")
+    st.write ("*Number of correctly annotated screen-classes:*")
     st.success (f"{correct_unique_annotation_count}")
 
 def get_correct_annotations_min_element (df):
@@ -44,11 +46,12 @@ def get_correct_annotations_min_element (df):
             if response == "Approve":
                 classes_correct [class_name] += 1
             classes_count [class_name] += 1
-    min_annotated_class = min(classes_count, key=classes_count.get) 
-    min_annotated_class_count = classes_count [min_annotated_class]
-    min_annotated_class_correct = classes_correct [min_annotated_class]
-    st.write ("Number of correct annotations for element with least number of annotations:")
-    st.success (f"{min_annotated_class_correct} out of {min_annotated_class_count} for {min_annotated_class}")
+    st.write ("*Number of correct annotations for elements with least number of annotations:*")
+    min_classes = dict(sorted(classes_count.items(), key = itemgetter(1))[:5])
+    for min_class in min_classes.keys():
+        min_annotated_class_count = classes_count [min_class]
+        min_annotated_class_correct = classes_correct [min_class]
+        st.write (f"- {min_annotated_class_correct} out of {min_annotated_class_count} for {min_class}")
 
 def get_worker_accuracy (df):
     worker_correct = {}
@@ -106,37 +109,32 @@ if selected_view == "Project View":
     st.subheader (f"Project: {selected_project}")
     get_correct_annotations (project)
     approved = project [project["response"] == "Approve"]
-    st.write ("Number of Approved Screen-Classes within Project:")
+    st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
     st.table (approved["class_name"].value_counts())
     get_correct_annotations_min_element (project)
 
     df = project.drop_duplicates("source-ref")
-    st.write ("Annotation Time Taken within Project:")
+    st.write ("*Annotation Time Taken within Project:*")
     st.table (df.groupby ("annotation_worker_id").sum()["annotation_time_taken"])
-    st.write ("Review Time Taken within Project:")
+    st.write ("*Review Time Taken within Project:*")
     st.table (df.groupby ("review_worker_id").sum()["review_time_taken"])
-    st.write ("Worker Accuracy within Project:")
+    st.write ("*Worker Accuracy within Project:*")
     get_worker_accuracy (project)
-    st.write ("Worker Accuracy by Class within Project:")
+    st.write ("*Worker Accuracy by Class within Project:*")
     st.table (get_worker_accuracy_by_class (project))
 
 elif selected_view == "Labeller View":
-    st.write ("Total Correct Screen Classes Annotated:")
-    approved_screen_classes = data.loc[(data['response'] == 'Approve') & (~data['class_name'].isna())]
-    num_correct = approved_screen_classes.groupby ("annotation_worker_id").count()["source-ref"]
-    num_correct = pd.DataFrame(num_correct).rename (columns= {"source-ref": "Number of Correct Screen-Classes"})
-    st.table (num_correct)
+    st.write ("*Number of Annotations per Labeller:*")
+    approved = data.loc[data['response'] == 'Approve']
+    num_correct = approved.groupby ("annotation_worker_id").count()["source-ref"]
+    num_total = data.groupby ("annotation_worker_id").count()["source-ref"]
+    num_total = pd.DataFrame(num_total).rename (columns= {"source-ref": "Total Annotations"})
+    num_correct = pd.DataFrame(num_correct).rename (columns= {"source-ref": "Correct Annotations"})
+    labeller_df = pd.merge (num_total, num_correct, left_index=True, right_index=True)
+    labeller_df ["Accuracy"] = round (labeller_df [labeller_df.columns[1]]/ labeller_df [labeller_df.columns[0]] * 100, 2)
+    st.table (labeller_df)
 
-    st.write ("% of annotations not sent to rework by labeller:")
-    grouped = data.groupby("annotation_worker_id")
-    for group in grouped:
-        worker = group [0]
-        annotations = group [1]
-        num_annotations = len (annotations)
-        correct_annotations = len (annotations[annotations["response"]== "Approve"])
-        st.write (f"{worker}: {round (correct_annotations/num_annotations * 100, 2)}%")
-
-    st.write ("Accuracy per class by labeller:")
+    st.write ("*Accuracy per Class by Labeller:*")
     class_grouped = data.groupby(["annotation_worker_id", "class_name"])
     workers = []
     accuracy = {}
@@ -156,33 +154,45 @@ elif selected_view == "Labeller View":
     accuracy_df = accuracy_df.set_index ("workers")
     st.table (accuracy_df)
 
-    st.write ("Overall Time Spent by Labeller")
+    st.write ("*Overall Time Spent:*")
     df = data.drop_duplicates (["source-ref", "project"])
-    times = {}
+    label_times = {}
     grouped = df.groupby("annotation_worker_id")
     for group in grouped:
         worker = group [0]
         annotations = group [1]
         time_spent = sum (annotations["annotation_time_taken"])
-        times [worker] = time_spent
-    for key, val in times.items ():
-        st.write (f"{key}: {round(val, 2)}s")
+        label_times [worker] = time_spent
+
+    review_times = {}
+    grouped = df.groupby("review_worker_id")
+    for group in grouped:
+        worker = group [0]
+        annotations = group [1]
+        time_spent = sum (annotations["review_time_taken"])
+        review_times [worker] = time_spent
+
+    times_df = pd.DataFrame()
+    times_df ["worker"] = label_times.keys()
+    times_df ["labelling_time"] = label_times.values ()
+    times_df ["reviewing_time"] = review_times.values ()
+    st.table (times_df)
 
 else:
     get_correct_annotations (data)
     approved = data[data["response"] == "Approve"]
-    st.write ("Overall Number of Approved Screen-Classes:")
+    st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
     st.table (approved["class_name"].value_counts())
     get_correct_annotations_min_element (data)
 
     df = data.drop_duplicates(["source-ref", "project"])
-    st.write ("Overall Annotation Time Taken:")
+    st.write ("*Overall Annotation Time Taken:*")
     st.table (df.groupby ("annotation_worker_id").sum()["annotation_time_taken"])
-    st.write ("Overall Review Time Taken:")
+    st.write ("*Overall Review Time Taken:*")
     st.table (df.groupby ("review_worker_id").sum()["review_time_taken"])
-    st.write ("Overall Worker Accuracy:")
+    st.write ("*Overall Worker Accuracy:*")
     get_worker_accuracy (data)
-    st.write ("Overall Worker Accuracy by Class:")
+    st.write ("*Overall Worker Accuracy by Class:*")
     st.table (get_worker_accuracy_by_class (data))
 
 
