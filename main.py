@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd 
 
-st.title ("SageMaker Labelling Tracker")
+st.title ("SageMaker Labelling Tracker - Test")
 
 options = ["Project View", "Labeller View", "Overall View"]
 
