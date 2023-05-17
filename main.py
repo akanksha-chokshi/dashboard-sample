@@ -37,12 +37,13 @@ def get_correct_annotations_min_element (df):
     for i in range (len (df)):
         class_name = df.loc [i, "class_name"]
         response = df.loc [i, "response"]
-        if class_name not in classes_count:
-            classes_correct [class_name] = 0
-            classes_count [class_name] = 0
-        if response == "Approve":
-            classes_correct [class_name] += 1
-        classes_count [class_name] += 1
+        if isinstance(class_name, str):
+            if class_name not in classes_count:
+                classes_correct [class_name] = 0
+                classes_count [class_name] = 0
+            if response == "Approve":
+                classes_correct [class_name] += 1
+            classes_count [class_name] += 1
     min_annotated_class = min(classes_count, key=classes_count.get) 
     min_annotated_class_count = classes_count [min_annotated_class]
     min_annotated_class_correct = classes_correct [min_annotated_class]
