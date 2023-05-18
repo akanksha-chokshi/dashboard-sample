@@ -134,9 +134,9 @@ if choice == "Analyse Completed Projects":
         st.table (df.groupby ("annotation_worker_id").sum()["annotation_time_taken"])
         st.write ("*Review Time Taken within Project:*")
         st.table (df.groupby ("review_worker_id").sum()["review_time_taken"])
-        st.write ("*Worker Accuracy within Project:*")
+        st.write ("*Labeller Accuracy within Project:*")
         get_worker_accuracy (project)
-        st.write ("*Worker Accuracy by Class within Project:*")
+        st.write ("*Labeller Accuracy by Class within Project:*")
         st.table (get_worker_accuracy_by_class (project))
 
     elif selected_view == "Labeller View":
@@ -208,9 +208,9 @@ if choice == "Analyse Completed Projects":
         st.table (df.groupby ("annotation_worker_id").sum()["annotation_time_taken"])
         st.write ("*Overall Review Time Taken:*")
         st.table (df.groupby ("review_worker_id").sum()["review_time_taken"])
-        st.write ("*Overall Worker Accuracy:*")
+        st.write ("*Overall Labeller Accuracy:*")
         get_worker_accuracy (data)
-        st.write ("*Overall Worker Accuracy by Class:*")
+        st.write ("*Overall Labeller Accuracy by Class:*")
         st.table (get_worker_accuracy_by_class (data))
 
 else:
