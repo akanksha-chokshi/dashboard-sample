@@ -122,7 +122,7 @@ if choice == "Analyse Completed Projects":
         st.subheader (f"Project: {selected_project}")
         get_correct_annotations (project)
         approved = project [project["response"] == "Approve"]
-        approved_screen_classes = approved[len(approved["class_name"]) > 0]
+        approved_screen_classes = approved[approved['class_name'].str.len() > 0]
         st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
         st.table (approved_screen_classes["class_name"].value_counts())
         get_correct_annotations_min_element (project)
@@ -196,7 +196,7 @@ if choice == "Analyse Completed Projects":
     else:
         get_correct_annotations (data)
         approved = data[data["response"] == "Approve"]
-        approved_screen_classes = approved [len (approved["class_name"]) > 0]
+        approved_screen_classes = approved[approved['class_name'].str.len() > 0]
         st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
         st.table (approved_screen_classes["class_name"].value_counts())
         get_correct_annotations_min_element (data)
