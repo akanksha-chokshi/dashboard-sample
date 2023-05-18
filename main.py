@@ -128,8 +128,8 @@ if choice == "Analyse Completed Projects":
         st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
         counts_df = approved_screen_classes["class_name"].value_counts()
         st.table (counts_df)
-        download = st.button ("Download")
-        if download:
+        download_counts = st.button ("Download")
+        if download_counts:
             counts_df.to_csv("screen_classes_count.csv")
         get_correct_annotations_min_element (project)
 
@@ -137,22 +137,22 @@ if choice == "Analyse Completed Projects":
         st.write ("*Annotation Time Taken within Project:*")
         annotation_time_df = df.groupby ("annotation_worker_id").sum()["annotation_time_taken"]
         st.table (annotation_time_df)
-        download = st.button ("Download")
-        if download:
+        download_times = st.button ("Download")
+        if download_times:
             annotation_time_df.to_csv("annotation_times.csv")
         st.write ("*Review Time Taken within Project:*")
         review_time_df = df.groupby ("review_worker_id").sum()["review_time_taken"]
         st.table (review_time_df)
-        download = st.button ("Download")
-        if download:
+        download_review_times = st.button ("Download")
+        if download_review_times:
             review_time_df.to_csv("review_times.csv")
         st.write ("*Worker Accuracy within Project:*")
         get_worker_accuracy (project)
         st.write ("*Worker Accuracy by Class within Project:*")
         class_accuracy_df = get_worker_accuracy_by_class (project)
         st.table (class_accuracy_df)
-        download = st.button ("Download")
-        if download:
+        download_labeller_acc = st.button ("Download")
+        if download_labeller_acc:
             class_accuracy_df.to_csv ("class_accuracy_labeller.csv")
 
     elif selected_view == "Labeller View":
