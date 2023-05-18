@@ -126,18 +126,34 @@ if choice == "Analyse Completed Projects":
         approved = project [project["response"] == "Approve"]
         approved_screen_classes = approved[approved['class_name'].str.len() > 0]
         st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
-        st.table (approved_screen_classes["class_name"].value_counts())
+        counts_df = approved_screen_classes["class_name"].value_counts()
+        st.table (counts_df)
+        download = st.button ("Download")
+        if download:
+            counts_df.to_csv("screen_classes_count.csv")
         get_correct_annotations_min_element (project)
 
         df = project.drop_duplicates("source-ref")
         st.write ("*Annotation Time Taken within Project:*")
-        st.table (df.groupby ("annotation_worker_id").sum()["annotation_time_taken"])
+        annotation_time_df = df.groupby ("annotation_worker_id").sum()["annotation_time_taken"]
+        st.table (annotation_time_df)
+        download = st.button ("Download")
+        if download:
+            annotation_time_df.to_csv("annotation_times.csv")
         st.write ("*Review Time Taken within Project:*")
-        st.table (df.groupby ("review_worker_id").sum()["review_time_taken"])
-        st.write ("*Labeller Accuracy within Project:*")
+        review_time_df = df.groupby ("review_worker_id").sum()["review_time_taken"]
+        st.table (review_time_df)
+        download = st.button ("Download")
+        if download:
+            review_time_df.to_csv("review_times.csv")
+        st.write ("*Worker Accuracy within Project:*")
         get_worker_accuracy (project)
-        st.write ("*Labeller Accuracy by Class within Project:*")
-        st.table (get_worker_accuracy_by_class (project))
+        st.write ("*Worker Accuracy by Class within Project:*")
+        class_accuracy_df = get_worker_accuracy_by_class (project)
+        st.table (class_accuracy_df)
+        download = st.button ("Download")
+        if download:
+            class_accuracy_df.to_csv ("class_accuracy_labeller.csv")
 
     elif selected_view == "Labeller View":
         st.write ("*Number of Annotations per Labeller:*")
