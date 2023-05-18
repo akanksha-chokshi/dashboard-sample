@@ -228,7 +228,7 @@ else:
 
         num_images = len (df)
         client = boto3.client('cognito-idp', aws_access_key_id = st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key = st.secrets["AWS_SECRET_ACCESS_KEY"])
-        user_pool_id = 'us-east-1_XMmVMOjC1'
+        user_pool_id = st.secrets["user_pool_id"]
 
         users = client.list_users(UserPoolId=user_pool_id)
 
