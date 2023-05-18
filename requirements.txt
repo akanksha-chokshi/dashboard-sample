@@ -1,6 +1,5 @@
 streamlit
 pandas
 boto3==1.26.135
-json
 io
 csv
