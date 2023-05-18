@@ -315,7 +315,7 @@ else:
             for label in image:
                 if isinstance (label, str):
                     unreviewed.append (label)
-        unreviewed_df = pd.Series(unreviewed).value_counts().reset_index().rename(columns = 0: "count")
+        unreviewed_df = pd.Series(unreviewed).value_counts().reset_index().rename(columns = {0: "count"})
         for i in range (len (unreviewed_df)):
             label = unreviewed_df.loc [i, "index"]
             count = unreviewed_df.loc [i, "count"]
