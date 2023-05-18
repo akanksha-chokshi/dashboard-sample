@@ -275,6 +275,7 @@ else:
                     class_count [x] += 1
                 
         st.success (f"*Number of unique screen-classes:* {annotations}")
+        st.write ("Breakdown of unique screen-classes by class:")
 
         for key, val in class_count.items():
             st.write (f"- {key}: {val}")
