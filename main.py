@@ -38,7 +38,7 @@ if choice == "Analyse Completed Projects":
     def get_correct_annotations (df):
         annotation_count = len (df)
         correct_annotation_count = df['response'].value_counts()['Approve']
-        correct_unique_annotation_count = len(df.loc[(df['response'] == 'Approve') & (~df['class_name'].isna())])
+        correct_unique_annotation_count = len(df.loc[(df['response'] == 'Approve') & (len (df['class_name']) > 0)])
         st.write ("*Number of Correct Annotations:*")
         st.success (f"{correct_annotation_count} out of {annotation_count}")
         st.write ("*Accuracy %:*")
@@ -52,7 +52,7 @@ if choice == "Analyse Completed Projects":
         for i in range (len (df)):
             class_name = df.loc [i, "class_name"]
             response = df.loc [i, "response"]
-            if isinstance(class_name, str):
+            if len (class_name) > 0:
                 if class_name not in classes_count:
                     classes_correct [class_name] = 0
                     classes_count [class_name] = 0
@@ -95,7 +95,7 @@ if choice == "Analyse Completed Projects":
             if worker not in worker_count_classes:
                 worker_count_classes [worker] = [0] * num_classes
                 worker_correct_classes [worker] = [0] * num_classes
-            if isinstance (label, str):
+            if len (label) > 0:
                 if review == "Approve": 
                     worker_correct_classes [worker][class_index [label]]+= 1
                 worker_count_classes [worker][class_index [label]] += 1
