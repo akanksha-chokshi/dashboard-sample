@@ -26,7 +26,7 @@ if choice == "Analyse Completed Projects":
     class_index = {}
     i = 0
     for label in list(data["class_name"].unique()):
-        if isinstance(label, str):
+        if len (label) > 0:
             class_index [label] = i
             i += 1
 
@@ -317,7 +317,7 @@ else:
         unreviewed = []
         for image in classes_unreviewed:
             for label in image:
-                if isinstance (label, str):
+                if len (label) > 0:
                     unreviewed.append (label)
         unreviewed_df = pd.Series(unreviewed).value_counts().reset_index().rename(columns = {0: "count"})
         for i in range (len (unreviewed_df)):
