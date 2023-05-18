@@ -257,6 +257,7 @@ else:
             labels.append ([x["label"] for x in df["answers"][0][0]["answerContent"]["boundingBox"]["boundingBoxes"]])
 
         labelled_images = pd.DataFrame({"labels": labels, "workers": workers, "times": times})
+        st.subheader ("Labelling")
 
         # Workers currently working on Project
         st.write (f"Labellers working on Project: {set (workers)}")
@@ -300,6 +301,8 @@ else:
             reviews.append (df["answers"][0][0]["answerContent"]["annotatedResult"]["label"])
 
         reviewed_images = pd.DataFrame ({"reviews": reviews, "reviewers": reviewers, "review_times": review_times})
+        
+        st.subheader ("Reviewing")
 
         # Workers currently working on Project
         st.write (f"Reviewers working on Project: {set (reviewers)}")
