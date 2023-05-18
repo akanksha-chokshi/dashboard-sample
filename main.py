@@ -38,7 +38,9 @@ if choice == "Analyse Completed Projects":
     def get_correct_annotations (df):
         annotation_count = len (df)
         correct_annotation_count = df['response'].value_counts()['Approve']
-        correct_unique_annotation_count = len(df.loc[(df['response'] == 'Approve') & (len (df['class_name']) > 0)])
+        approved = df [df ["response"] == "Approve"]
+        approved_screen_classes = approved[approved['class_name'].str.len() > 0]
+        correct_unique_annotation_count = len(approved_screen_classes)
         st.write ("*Number of Correct Annotations:*")
         st.success (f"{correct_annotation_count} out of {annotation_count}")
         st.write ("*Accuracy %:*")
