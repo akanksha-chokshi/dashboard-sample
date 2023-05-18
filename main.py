@@ -122,8 +122,9 @@ if choice == "Analyse Completed Projects":
         st.subheader (f"Project: {selected_project}")
         get_correct_annotations (project)
         approved = project [project["response"] == "Approve"]
+        approved_screen_classes = approved[len(approved["class_name"]) > 0]
         st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
-        st.table (approved["class_name"].value_counts())
+        st.table (approved_screen_classes["class_name"].value_counts())
         get_correct_annotations_min_element (project)
 
         df = project.drop_duplicates("source-ref")
@@ -153,15 +154,16 @@ if choice == "Analyse Completed Projects":
         accuracy = {}
         for group in class_grouped:
             worker = group [0][0]
-            if worker not in workers:
-                workers.append (worker)
             class_name = group [0][1]
-            annotations = group [1]
-            num_annotations = len (annotations)
-            correct_annotations = len (annotations[annotations["response"]== "Approve"])
-            if class_name not in accuracy:
-                accuracy [class_name] = []
-            accuracy [class_name].append (round (correct_annotations/num_annotations * 100, 2))
+            if len (class_name) > 0:
+                if worker not in workers:
+                    workers.append (worker)
+                annotations = group [1]
+                num_annotations = len (annotations)
+                correct_annotations = len (annotations[annotations["response"]== "Approve"])
+                if class_name not in accuracy:
+                    accuracy [class_name] = []
+                accuracy [class_name].append (round (correct_annotations/num_annotations * 100, 2))
         accuracy_df = pd.DataFrame (accuracy)
         accuracy_df ["workers"] = workers
         accuracy_df = accuracy_df.set_index ("workers")
@@ -194,8 +196,9 @@ if choice == "Analyse Completed Projects":
     else:
         get_correct_annotations (data)
         approved = data[data["response"] == "Approve"]
+        approved_screen_classes = approved [len (approved["class_name"]) > 0]
         st.write ("*Breakdown of Correctly Annotated Screen-Classes by Class:*")
-        st.table (approved["class_name"].value_counts())
+        st.table (approved_screen_classes["class_name"].value_counts())
         get_correct_annotations_min_element (data)
 
         df = data.drop_duplicates(["source-ref", "project"])
